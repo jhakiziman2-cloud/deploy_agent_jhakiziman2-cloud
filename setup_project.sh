@@ -99,7 +99,8 @@ def run_attendance_check():
                     print(f"[DRY RUN] Email to {email}: {message}")
 
 if __name__ == "__main__":
-    run_attendance_check() EOF
+    run_attendance_check() 
+EOF
     echo "Created main Python file: attendance_checker.py"
 fi
 
