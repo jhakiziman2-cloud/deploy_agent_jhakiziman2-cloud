@@ -40,6 +40,11 @@ fi
 
 #Create parent directory
 mkdir -p "attendance_tracker_${input}"
+# Check if directory creation failed
+if [ $? -ne 0 ]; then
+    echo "Error: Could not create project directory. Check permissions."
+    exit 1
+fi
 cd "attendance_tracker_${input}" || exit
 
 #Validate and create subdirectories
@@ -109,12 +114,13 @@ chmod +x attendance_checker.py
 
 #Create assets.csv if missing
 if [ ! -f Helpers/assets.csv ]; then
-    cat > Helpers/assets.csv <<EOL
+    cat > Helpers/assets.csv << EOF
 Email,Names,Attendance Count,Absence Count
 alice@example.com,Alice Johnson,14,1
 bob@example.com,Bob Smith,7,8
 charlie@example.com,Charlie Davis,4,11
 diana@example.com,Diana Prince,15,0
+
 EOF
     echo "Created Helpers/assets.csv"
 fi
@@ -159,7 +165,17 @@ if [[ "$update_config" == "yes" ]]; then
 # Use defaults if user leaves blank
 warning=${warning:-75}
 failure=${failure:-50}
+#Check if warning is numeric
+if ! [[ "$warning" =~ ^[0-9]+$ ]]; then
+    echo "Error: Warning threshold must be a number."
+    exit 1
+fi
 
+#Check if  failure is numeric
+if ! [[ "$failure" =~ ^[0-9]+$ ]]; then
+    echo "Error: Failure threshold must be a number."
+    exit 1
+fi
 # Update config.json using sed
 sed -i "s/\"warning\": [0-9]\+/\"warning\": $warning/" Helpers/config.json
 sed -i "s/\"failure\": [0-9]\+/\"failure\": $failure/" Helpers/config.json
@@ -172,5 +188,9 @@ fi
 #project structure
 echo -e "\nProject setup complete!"
 echo "Path: $(pwd)"
-echo -e "\nDirectory structure:"
-tree -F
+if command -v tree > /dev/null 2>&1; then
+    tree -F
+else
+    echo "Tree command not found. Showing basic structure:"
+    ls -R
+fi
